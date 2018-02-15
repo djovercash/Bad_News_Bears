@@ -7,10 +7,16 @@
 #   Character.create(name: 'Luke', movie: movies.first)
 
 
-10.times do |u|
-  User.create(username: "User #{u}")
-end
-
+joseph = User.create(username: "Joseph")
+john = User.create(username: "John")
+anna = User.create(username: "Anna")
+drew = User.create(username: "Drew")
+kevin = User.create(username: "Kevin")
+mo = User.create(username: "Mo")
+oleg = User.create(username: "Oleg")
+mark = User.create(username: "Mark")
+briana = User.create(username: "Briana")
+julien = User.create(username: "Julien")
 
 10.times do |i|
   Idea.create(description: "Idea #{i}", user_id: Random.new.rand(1..10))
