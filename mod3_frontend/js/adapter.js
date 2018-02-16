@@ -12,6 +12,18 @@ const Adapter = (function() {
       return fetch(IDEAURL).then(res => res.json())
     }
 
+    static createUser(username) {
+      return fetch(USERURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          username: username
+        })
+      }).then(res => res.json())
+    }
+
     static createIdea(userId, description) {
       return fetch(IDEAURL, {
         method: "POST",

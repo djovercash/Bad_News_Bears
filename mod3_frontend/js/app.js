@@ -15,6 +15,7 @@ const App = (function() {
 
     static postIdeas() {
       let ideasContainer = document.getElementById("newIdeaList");
+      ideasContainer.setAttribute("style","overflow:auto;height:230px")
       Adapter.getIdeas().then(ideas => {
         let newAndUnfinished = ideas.filter(idea => {
           return idea.outcome.length === 1;
@@ -27,44 +28,64 @@ const App = (function() {
     }
 
     static findUser(userInput) {
+      console.log(userInput)
       let userContainer = document.getElementById("postLogInContainer");
       let userIdeasContainer = document.getElementById("rightContainer");
+      let voteContainer = document.getElementById("voteBox");
       let login = document.getElementById("titleLogin");
       let ideasContainer = document.getElementById("newIdeaList");
       let chartBox = document.getElementById("pieChartDiv");
+      let leftContainer = document.getElementById('leftContainer')
       let h2 = document.createElement("h2");
-      h2.innerText = "Your Bad Ideas:";
-      userIdeasContainer.append(h2);
+      userContainer.innerHTML = " "
+      voteContainer.innerHTML = " ";
       chartBox.innerHTML = " ";
       Adapter.getUsers().then(json => {
         let apiUser = json.find(user => {
           return user.username === userInput;
         });
-        let currentUser = new User(apiUser);
-        login.append(currentUser.renderUsername());
-        userContainer.append(Idea.renderBadIdeaForm());
-        ideasContainer.innerHTML = " ";
-        let voteContainer = document.getElementById("voteBox");
-        voteContainer.innerHTML = " ";
-        Adapter.getIdeas().then(json => {
-          let notUserIdeas = json.filter(idea => {
-            return idea.user_id !== currentUser.id && idea.outcome.length === 1;
-          });
-          notUserIdeas.forEach(idea => {
-            let nIdea = new Idea(idea);
-            ideasContainer.append(nIdea.renderIdeas());
-          });
-        });
-        Adapter.getIdeas().then(json => {
-          let ideas = json.filter(idea => {
-            return idea.user_id === currentUser.id && idea.outcome.length === 1;
-          });
-          ideas.forEach(idea => {
-            let newIdea = new Idea(idea);
-            userIdeasContainer.append(newIdea.renderUserIdeas());
-          });
-        });
+        if (!apiUser) {
+          leftContainer.childNodes[1].innerText = " "
+          ideasContainer.innerHTML = " ";
+          userContainer.append(User.renderCreateUserForm())
+        } else {
+            let currentUser = new User(apiUser);
+            ideasContainer.innerHTML = " ";
+            login.append(currentUser.renderUsername());
+            userContainer.append(Idea.renderBadIdeaForm());
+            Adapter.getIdeas().then(json => {
+              let notUserIdeas = json.filter(idea => {
+                return idea.user_id !== currentUser.id && idea.outcome.length === 1;
+              });
+              notUserIdeas.forEach(idea => {
+                let nIdea = new Idea(idea);
+                leftContainer.childNodes[1].innerText = "Newest Ideas"
+                ideasContainer.append(nIdea.renderIdeas());
+              });
+            });
+            Adapter.getIdeas().then(json => {
+              let ideas = json.filter(idea => {
+                return idea.user_id === currentUser.id && idea.outcome.length === 1;
+              });
+              h2.innerText = "Your Bad Ideas:";
+              userIdeasContainer.append(h2);
+              ideas.forEach(idea => {
+                let newIdea = new Idea(idea);
+                userIdeasContainer.append(newIdea.renderUserIdeas());
+              });
+            });
+        };
       });
+    }
+
+    static createNewUser(event) {
+      event.preventDefault();
+      let newUser = document.getElementById('newUserInput').value
+      Adapter.createUser(newUser)
+      .then(data => {
+        let createdUser = new User(data)
+        App.findUser(createdUser.user)
+      })
     }
 
     static createNewIdea(event, id) {
